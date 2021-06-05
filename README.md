@@ -1,2 +1,3 @@
-# elliat.nl
-Github pages for my website
+# Elliat
+
+## Combining JavaScript with XML
