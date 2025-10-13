@@ -1,0 +1,20 @@
+{
+  "name": "presentations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "present": "reveal-notes-server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@picocss/pico": "^2.1.1",
+    "hljs": "^6.2.3",
+    "prettier": "^3.6.2",
+    "reveal-notes-server": "^0.2.1"
+  },
+  "devDependencies": {
+    "prettier-plugin-xquery": "^1.2.6"
+  }
+}

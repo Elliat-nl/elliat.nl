@@ -1,0 +1,154 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="./presentation" type="module"></script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section id="opener">
+          <h2>JavaScripter writing XQuery: Formatting XQuery code</h2>
+          <h4>Martin Middel</h4>
+          <h5>Declarative Amsterdam, 9 November 2025</h5>
+        </section>
+        <section id="2">
+          <section>
+            <h2>A brief history of me</h2>
+          </section>
+          <section id="2.1">
+            <h2>
+              Started (professionally) writing JavaScript code around 2012
+            </h2>
+            <div class="r-stack">
+              <img
+                src="assets/fontoxml.png"
+                class="fragment fade-in-then-out fade-in-then-out"
+                width="400"
+              />
+              <img
+                src="assets/angular-js.png"
+                class="fragment fade-in-then-out fade-in-then-out"
+              />
+              <img
+                src="assets/ie.png"
+                class="fragment fade-in-then-out fade-in-then-out"
+              />
+              <pre
+                class="fragment fade-in-then-out fade-in-then-out"
+              ><code>console.log('Here!')</code></pre>
+              <pre
+                class="fragment fade-in-then-out fade-in-then-out"
+              ><code>document.querySelector('div').?????</code></pre>
+              <pre
+                class="fragment fade-in-then-out fade-in-then-out language-javascript"
+              ><code data-trim>
+                  node.apendChild(newChildNode);
+              </code></pre>
+              <pre
+                class="fragment fade-in-then-out fade-in-then-out"
+              ><code>if(something) {doSomething(); console.log('Did something!')}
+                  else {
+                  doNothing()
+                  }</code></pre>
+            </div>
+            <aside class="notes">
+              <p>
+                I started writing JavaScript for Money around 2012. With the
+                company FontoXML
+              </p>
+              <p>Back then, we were using AngularJS (EOL 2022)</p>
+              <p>We supported Internet Explorer 8</p>
+              <p>Debugging? How about console.log('Here!')</p>
+              <p>Autocomplete? Nope. Same-file if lucky.</p>
+              <p>Typechecking? Nope.</p>
+              <p>Formatting? Handwritten code style guide.</p>
+            </aside>
+          </section>
+          <section>
+            <h2>But that improved!</h2>
+            <div class="r-stack">
+              <div class="fragment fade-in-then-out">
+                <h3>2013: Typechecking with TypeScript!</h3>
+                <pre><code data-trim class="language-javascript">
+// Property 'apendChild' does not exist on type 'Node'.
+// Did you mean 'log'?(2551)
+node.apendChild(newChildNode);
+</code></pre>
+              </div>
+              <div class="fragment fade-in-then-out">
+                <h3>2016: Autocomplete with Language Server Protocol</h3>
+                <img src="assets/autocomplete.png" />
+              </div>
+              <div class="fragment fade-in-then-out">
+                <h3>
+                  Step through debugging with Chrome (2017) and Firefox (2018)
+                </h3>
+                <img src="assets/stepthrough.png" />
+              </div>
+              <div class="fragment fade-in-then-out">
+                <h3>2017: Automated formatting with Prettier</h3>
+                <pre><code style="min-height: initial;">if (something) {
+  doSomething();
+  console.log("Did something!");
+} else {
+  doNothing();
+}</code></pre>
+              </div>
+            </div>
+          </section>
+          <section><h2>It was starting to get good!</h2></section>
+        </section>
+        <section>
+          <section>
+            <h2>And then: XQuery</h2>
+          </section>
+          <section>
+            <h2>Felt like going back in time a bit...</h2>
+            <div class="r-stack">
+              <pre class="fragment fade-in-then-out"><code>child:p</code></pre>
+              <pre
+                class="fragment fade-in-then-out"
+              ><code>idnex-of(('a', 'b'), 'a')</code></pre>
+              <pre
+                class="fragment fade-in-then-out"
+              ><code>trace($var, 'I am here!')</code></pre>
+              <pre class="fragment fade-in-then-out language-xquery"><code >
+if ($something) then (util:log('info', 'Did something!'), local:do-something()) else
+    local:do-nothing()</code></pre>
+            </div>
+          </section>
+        </section>
+        <section>I missed JS</section>
+        <section>
+          <h3>Introducing!</h3>
+          <h1>prettier-plugin-XQuery</h1>
+          <img src="assets/banana-dance.gif" />
+        </section>
+        <section>
+          <pre class="language-xquery"><code >
+if ($something) then (util:log('info', 'Did something!'), local:do-something()) else
+local:do-nothing()</code></pre>
+          <button is="prettify-button" class="secondary">🪄</button>
+        </section>
+        <section>
+          <pre class="language-xquery"><code data-trim>
+&lt;table&gt;{
+  for $i in 1 to xs:int($data?rows)
+   return &lt;tr&gt;{for $j in 1 to xs:int($data?cols) return
+&lt;td&gt;
+&lt;p&gt;cell at {$i},{$j}&lt;/p&gt;&lt;/td&gt;
+   }&lt;/tr&gt;
+}&lt;/table&gt;</code></pre>
+          <button is="prettify-button" class="secondary">🪄</button>
+        </section>
+        <section>
+          <pre><code data-trim>let $a :=
+              ancestor-or-self::div|section otherwise
+              descendant-or-self::div|section
+              return $a => exists()</code></pre>
+          <button is="prettify-button" class="secondary">🪄</button>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

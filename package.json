@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/reveal.js": "^5.2.1",
+    "highlight.js": "^11.11.1",
+    "prettier": "^3.6.2",
+    "reveal.js": "^5.2.1",
+    "vite": "^7.1.9"
+  }
+}
