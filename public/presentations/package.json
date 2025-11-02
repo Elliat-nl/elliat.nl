@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@picocss/pico": "^2.1.1",
+    "@prettier/plugin-xml": "^3.4.2",
     "hljs": "^6.2.3",
     "prettier": "^3.6.2",
     "reveal-notes-server": "^0.2.1"
