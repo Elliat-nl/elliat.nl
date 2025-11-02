@@ -2,14 +2,17 @@ import Reveal from "reveal.js";
 import RevealHighlight from "reveal.js/plugin/highlight/highlight.esm.js";
 import RevealNotes from "reveal.js/plugin/notes/notes";
 
+import "@picocss/pico";
 import "reveal.js/dist/reveal.css";
+import "reveal.js/dist/reset.css";
 import "reveal.js/dist/theme/moon.css";
 import "reveal.js/plugin/highlight/monokai.css";
-import "@picocss/pico";
 
 import prettierPluginXQuery from "prettier-plugin-xquery";
 import prettierPluginXml from "@prettier/plugin-xml";
-import prettier, { Plugin } from "prettier";
+import prettier, { Plugin, doc } from "prettier";
+
+const { group } = doc.builders;
 const deck = new Reveal({
   plugins: [RevealHighlight, RevealNotes],
   controlsTutorial: false,
@@ -25,21 +28,26 @@ const xsltplugin: Plugin = {
   ...prettierPluginXml,
   printers: {
     xml: {
+      ...prettierPluginXml.printers.xml,
       embed: (path, options) => {
         const node = path.node;
-        if (node.name === "attribute") {
-          console.log("!!!");
-          return async (textToDoc, print) => {
-            const docNode = await textToDoc(node.content, {
-              parser: prettierPluginXQuery.parsers!.xquery!,
+        if (
+          node.name === "attribute" &&
+          ["match", "select"].includes(node.Name)
+        ) {
+          return async (textToDoc, _print) => {
+            const rawValue = node.STRING as string;
+            const withoutQuotes = rawValue.substring(1, rawValue.length - 1);
+            const docNode = await textToDoc(withoutQuotes, {
+              parser: "xquery4",
+              singleQuote: true,
             });
 
-            return group(docNode);
+            return group([node.Name, '="', docNode, '"']);
           };
         }
-        return prettierPluginXml.printer.embed(path, options);
+        return prettierPluginXml.printers.xml.embed(path, options);
       },
-      ...prettierPluginXml,
     },
   },
 };

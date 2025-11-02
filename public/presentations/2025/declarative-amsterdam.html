@@ -1,4 +1,4 @@
-<html>
+<html data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <script src="./presentation" type="module"></script>
@@ -89,7 +89,9 @@ node.apendChild(newChildNode);
               </div>
               <div class="fragment fade-in-then-out">
                 <h3>2017: Automated formatting with Prettier</h3>
-                <pre><code style="min-height: initial;">if (something) {
+                <pre
+                  class="language-js"
+                ><code style="min-height: initial;">if (something) {
   doSomething();
   console.log("Did something!");
 } else {
@@ -104,6 +106,11 @@ node.apendChild(newChildNode);
         <section>
           <section>
             <h2>And then: XQuery</h2>
+            <aside class="notes">
+              In Fonto we introduced a lot of XQuery based APIs. That made me
+              write a lot more XQuery. Later on, I joined exist solutions
+              (callout Juri!) and I started to write more XQuery than JS.
+            </aside>
           </section>
           <section>
             <h2>Felt like going back in time a bit...</h2>
@@ -119,16 +126,50 @@ node.apendChild(newChildNode);
 if ($something) then (util:log('info', 'Did something!'), local:do-something()) else
     local:do-nothing()</code></pre>
             </div>
+            <aside class="notes">
+              <p>
+                It started to itch. No longer did I have my linter / syntax
+                checker. Gone was my step-through debugger, I did not even have
+                a formatter anymore.
+              </p>
+              <p>Especially one that worked with XPath 3.1</p>
+            </aside>
           </section>
         </section>
 
-        <section>I missed JS</section>
+        <section data-background-iframe="./assets/controller.xql">
+          <aside class="notes">
+            At some point I was doing some maintainance on this file. This was
+            the drop that spilled my bucket. It's about 1200 lines, and the
+            maximum column width was 470 characters. That did not fit on my
+            screen anymore.
+          </aside>
+        </section>
+
+        <section>
+          <p>I missed JS</p>
+          <aside class="notes">This was too much. I missed JS.</aside>
+        </section>
 
         <section>
           <section>
             <h3>Introducing!</h3>
-            <h1>prettier-plugin-XQuery</h1>
-            <img src="assets/banana-dance.gif" />
+            <div class="fragment">
+              <h1>prettier-plugin-XQuery</h1>
+              <img src="assets/banana-dance.gif" />
+            </div>
+            <aside class="notes">
+              <h1>INTRODUCING</h1>
+              <p>prettier-plugin-xquery</p>
+              <p>
+                Felt at the time like the simplest thing to 'port' from my JS
+                workflow.
+              </p>
+              <p>
+                With exist solutions I maintained a large old codebase.
+                Formatting this would make it so much more maintainable.
+              </p>
+            </aside>
           </section>
 
           <section>
@@ -152,13 +193,105 @@ local:do-nothing()</code></pre>
 
           <section>
             <h2>Dialects?</h2>
-            <h3>🧪 Exist-DB's update node syntax 🧪</h3>
-            <pre class="language-xquery"><code data-trim data-xquery-4>
+            <div class="fragment">
+              <h3>🧪 Exist-DB's update node syntax 🧪</h3>
+              <pre class="language-xquery"><code data-trim data-xquery-4>
 let $node := &lt;root&gt;&lt;a/&gt;&lt;/root&gt;
 return
     update insert &lt;b/&gt; into $node/a
 		  </code></pre>
+              <button is="prettify-button" class="secondary">🪄</button>
+            </div>
+            <aside class="notes">
+              <p>
+                How about dialects? Supporting XQuery 3.1 is cool, but in
+                practice there are many dialects around.
+              </p>
+              <ol>
+                <li>XQuery Update Facility adds some syntax sugar,</li>
+                <li>XQuery Full Text adds syntax,</li>
+                <li>Exist-DB has some update node syntax,</li>
+                <li>BaseX has their own flavour of if/else conditions,</li>
+                <li>Marklogic has their own flavour of XQuery</li>
+              </ol>
+              <p>
+                By default the parser rejects dialects as they are syntax
+                invalid
+              </p>
+              <p>CLICK</p>
+              <p>
+                the plugin supports Exist-DB's update node syntax, partially
+                sponsored by ExistSolutions!
+              </p>
+            </aside>
+          </section>
+
+          <section>
+            <h2>XSLT?</h2>
+            <h3>🧪</h3>
+            <pre class="language-xslt"><code data-trim>
+  &lt;xsl:template match="Author"&gt;
+    - &lt;xsl:value-of select="1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27" /&gt;
+  &lt;/xsl:template&gt;
+		    </code></pre>
             <button is="prettify-button" class="secondary">🪄</button>
+            <aside class="notes">
+              <p>
+                XPath/XQuery also occurs in other languages, like XProc, XSLT,
+                Schematron, etcetera.
+              </p>
+              <p>
+                I have started work on an additional prettier plugin that
+                combines both the official XML formatter with the XQuery
+                formatter that handles these embeddings.
+              </p>
+              <p>
+                This is 100% work in progress, but come and talk if you're
+                intrested in it already!
+              </p>
+            </aside>
+          </section>
+
+          <section>
+            <h2>Speed?</h2>
+            <table>
+              <thead>
+                <th>Filesize</th>
+                <th>line count after formatting</th>
+                <th>Prettify in ms</th>
+              </thead>
+              <tr>
+                <td>183B</td>
+                <td>4</td>
+                <td>~10ms</td>
+              </tr>
+              <tr>
+                <td>6KB</td>
+                <td>161</td>
+                <td>~34ms</td>
+              </tr>
+              <tr>
+                <td>24KB</td>
+                <td>641</td>
+                <td>170ms</td>
+              </tr>
+              <tr>
+                <td>94KB</td>
+                <td>2663</td>
+                <td>~600ms</td>
+              </tr>
+            </table>
+            <aside class="notes">
+              <p>No tool will be used if it is slow. So how fast is it?</p>
+              <p>
+                I randomly took a small file, a 'normal' size one, a big one and
+                one huge one, and while the bigger one is slow, it is usable.
+              </p>
+              <p>
+                One has to ask themselves, is a file with more than 1000 lines
+                still an OK pattern? Should that be split up?
+              </p>
+            </aside>
           </section>
 
           <section>
@@ -168,16 +301,46 @@ return
               descendant-or-self::(div|section)
               return $a => exists()</code></pre>
             <button is="prettify-button" class="secondary">🪄</button>
+            <aside class="notes">
+              As we all know (shoutout Juri) XQuery 4 is a thing. So it should
+              be supported. I will support it, but it is undergoing more
+              finetuning before its public release.
+            </aside>
           </section>
         </section>
         <section>
           <h1>How?</h1>
-          <h3>Plugin for Prettier</h3>
-          <h3>Gunther Rademacher's REX parser</h3>
-          <h3>REX Parser to 'amend' grammars for 'dialects'</h3>
-          <h3>
-            Verifies correctness using QT3 / QT4 test set plus additional tests
-          </h3>
+          <ul>
+            <li><p>Plugin for Prettier</p></li>
+            <li>
+              <p>Gunther Rademacher's REx parser generator</p>
+            </li>
+            <li>
+              <p>Some JS to 'amend' grammars for 'dialects'</p>
+            </li>
+            <li>
+              <p>
+                Verifies correctness using QT3 / QT4 test set plus additional
+                tests
+              </p>
+            </li>
+          </ul>
+          <aside class="notes">
+            <p>So how does it work?</p>
+            <p>I am presenting today a plugin to Prettier.</p>
+            <p>It uses Gunther Rademacher's REx parser generator</p>
+            <p>
+              It supports dialects in an abstract way by making edits to the
+              XQuery 4 grammar
+            </p>
+            <p>
+              It verifies correctness using the QT3/QT4 test set, plus a number
+              of additional tests. It formats a test case, and reformats it to
+              check it does not produce syntax errors, and makes sure the
+              formatting is stable: does not cause a different format the second
+              time around.
+            </p>
+          </aside>
         </section>
         <section>
           <h2>Prettier</h2>
@@ -224,6 +387,11 @@ const stringConcatExpression = join([
           </div>
           <aside class="notes">
             <p>
+              Prettier is a framework for formatters. It used to be JavaScript,
+              but it is language-agnostic nowadays.
+            </p>
+
+            <p>
               While this presentation is way too short to go into Prettier, a
               short rundown of how it works. It's DECLARATIVE!
             </p>
@@ -247,6 +415,29 @@ const stringConcatExpression = join([
           <section>
             <h2>🧪Dialects🧪</h2>
             <h4>Experimental. Not fully implemented yet</h4>
+            <aside class="notes">
+              <p>
+                So talking about dialects. As I stated before, there are
+                numerous. And they all add their own keywords and syntax rules.
+                While there is a grammar for XQuery 3.1 plus the ExistDB update
+                syntax, there is none for the XQuery 4 yet.
+              </p>
+              <p>
+                And absolutely not for XQuery 4 plus ExistDB update syntax plus
+                the BaseX if conditions
+              </p>
+              <p>JavaScript solved this by with Babel: just parse everything</p>
+              <p>
+                But we have even more challenges: the XQuery 4 spec is under
+                flux, and I do not want to manually apply changes whenever the
+                grammar changes
+              </p>
+              <p>
+                So I decided if I could come up with a way to express these
+                dialects as amendments over the original grammar
+              </p>
+              <p>Hoping they would not clash...</p>
+            </aside>
           </section>
           <section>
             <h2>Amending grammars</h2>
@@ -291,6 +482,21 @@ const stringConcatExpression = join([
               (should be) extensible to the other dialects
             </aside>
           </section>
+          <section>
+            <pre
+              class="language-ebnf"
+            ><code>ExprSingle ::= ExistDB_UpdateExpr | ( FLWORExpr | QuantifiedExpr | SwitchExpr | TypeswitchExpr | IfExpr | TryCatchExpr | OrExpr )
+ExistDB_UpdateExpr ::= 'update' ( ExistDB_UpdateInsertExpr | ExistDB_UpdateReplaceExpr | ExistDB_UpdateDeleteExpr | ExistDB_UpdateRenameExpr | ExistDB_UpdateValueExpr )
+ExistDB_UpdateInsertExpr ::= 'insert' Expr (
+    'into' | 'following' | 'preceding'
+  ) ExprSingle
+ExistDB_UpdateReplaceExpr ::= 'replace' Expr 'with' ExprSingle
+ExistDB_UpdateValueExpr ::= 'value' Expr 'with' ExprSingle
+ExistDB_UpdateDeleteExpr ::= 'delete' Expr
+ExistDB_UpdateRenameExpr ::= 'rename' Expr 'as' ExprSingle
+
+</code></pre>
+          </section>
         </section>
         <section>
           <h2>Status</h2>
@@ -315,20 +521,46 @@ const stringConcatExpression = join([
             </ol>
           </aside>
         </section>
+        <section data-background-iframe="./assets/controller-formatted.xql">
+          <h2>That big file? Still huge, easier to read.</h2>
+          <h5>This took 250 ms to format 🐇</h5>
+        </section>
         <section>
           <h1>Why</h1>
           <h2 class="fragment">Useful?</h2>
+          <aside class="notes">
+            It's always good to ask yourself at some point why you;re doing
+            this. The formatting has proven to be useful, it is in use in a
+            number of projects, and it has helped maintainance effort on some
+            really complex files
+          </aside>
         </section>
         <section>
           <h1>Available on NPM</h1>
-          <h2>prettier-plugin-xquery</h2>
-          <h2>xquery.elliat.nl</h2>
+          <h2>
+            <a href="https://www.npmjs.com/package/prettier-plugin-xquery"
+              >prettier-plugin-xquery</a
+            >
+          </h2>
+          <h2>Demo: <a href="https://xquery.elliat.nl">xquery.elliat.nl</a></h2>
         </section>
         <section>
           <h1>Q?</h1>
 
-          <h5>prettier-plugin-xquery</h5>
-          <h5>xquery.elliat.nl</h5>
+          <h5>
+            <a href="https://www.npmjs.com/package/prettier-plugin-xquery"
+              >prettier-plugin-xquery</a
+            >
+          </h5>
+          <h5><a href="https://xquery.elliat.nl">xquery.elliat.nl</a></h5>
+        </section>
+
+        <section
+          data-theme="light"
+          data-preload
+          data-background-iframe="https://xquery.elliat.nl/?state=H4sIAAAAAAAAA23MMQ7CMAwAwK-YzKCItVj5BksWN7VoRGsXx61aIf6O2LkH3DtsbK2qhO56DvtrZTtCFwYuExlDr6sMZMelLVQYFuPGtvEtSxbc5yllAUBKGClhHxOWdK8-QlFxFgdXmOnJ4GNt4KowqTxOQH9gLCkLxt8aPl8r-NGJmAAAAA"
+        >
+          <h1>DEMO</h1>
         </section>
       </div>
     </div>
