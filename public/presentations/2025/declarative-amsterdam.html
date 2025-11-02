@@ -6,16 +6,17 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        <section id="opener">
+        <section>
           <h2>JavaScripter writing XQuery: Formatting XQuery code</h2>
           <h4>Martin Middel</h4>
           <h5>Declarative Amsterdam, 9 November 2025</h5>
         </section>
-        <section id="2">
+
+        <section>
           <section>
             <h2>A brief history of me</h2>
           </section>
-          <section id="2.1">
+          <section>
             <h2>
               Started (professionally) writing JavaScript code around 2012
             </h2>
@@ -64,6 +65,7 @@
               <p>Formatting? Handwritten code style guide.</p>
             </aside>
           </section>
+
           <section>
             <h2>But that improved!</h2>
             <div class="r-stack">
@@ -98,6 +100,7 @@ node.apendChild(newChildNode);
           </section>
           <section><h2>It was starting to get good!</h2></section>
         </section>
+
         <section>
           <section>
             <h2>And then: XQuery</h2>
@@ -118,20 +121,25 @@ if ($something) then (util:log('info', 'Did something!'), local:do-something()) 
             </div>
           </section>
         </section>
+
         <section>I missed JS</section>
+
         <section>
-          <h3>Introducing!</h3>
-          <h1>prettier-plugin-XQuery</h1>
-          <img src="assets/banana-dance.gif" />
-        </section>
-        <section>
-          <pre class="language-xquery"><code >
+          <section>
+            <h3>Introducing!</h3>
+            <h1>prettier-plugin-XQuery</h1>
+            <img src="assets/banana-dance.gif" />
+          </section>
+
+          <section>
+            <pre class="language-xquery"><code >
 if ($something) then (util:log('info', 'Did something!'), local:do-something()) else
 local:do-nothing()</code></pre>
-          <button is="prettify-button" class="secondary">🪄</button>
-        </section>
-        <section>
-          <pre class="language-xquery"><code data-trim>
+            <button is="prettify-button" class="secondary">🪄</button>
+          </section>
+
+          <section>
+            <pre class="language-xquery"><code data-trim>
 &lt;table&gt;{
   for $i in 1 to xs:int($data?rows)
    return &lt;tr&gt;{for $j in 1 to xs:int($data?cols) return
@@ -139,14 +147,188 @@ local:do-nothing()</code></pre>
 &lt;p&gt;cell at {$i},{$j}&lt;/p&gt;&lt;/td&gt;
    }&lt;/tr&gt;
 }&lt;/table&gt;</code></pre>
-          <button is="prettify-button" class="secondary">🪄</button>
+            <button is="prettify-button" class="secondary">🪄</button>
+          </section>
+
+          <section>
+            <h2>Dialects?</h2>
+            <h3>🧪 Exist-DB's update node syntax 🧪</h3>
+            <pre class="language-xquery"><code data-trim data-xquery-4>
+let $node := &lt;root&gt;&lt;a/&gt;&lt;/root&gt;
+return
+    update insert &lt;b/&gt; into $node/a
+		  </code></pre>
+            <button is="prettify-button" class="secondary">🪄</button>
+          </section>
+
+          <section>
+            <h2>🧪 XQuery 4? 🧪</h2>
+            <pre class="language-xquery"><code data-trim data-xquery-4>let $a :=
+              ancestor-or-self::(div|section) otherwise
+              descendant-or-self::(div|section)
+              return $a => exists()</code></pre>
+            <button is="prettify-button" class="secondary">🪄</button>
+          </section>
         </section>
         <section>
-          <pre><code data-trim>let $a :=
-              ancestor-or-self::div|section otherwise
-              descendant-or-self::div|section
-              return $a => exists()</code></pre>
-          <button is="prettify-button" class="secondary">🪄</button>
+          <h1>How?</h1>
+          <h3>Plugin for Prettier</h3>
+          <h3>Gunther Rademacher's REX parser</h3>
+          <h3>REX Parser to 'amend' grammars for 'dialects'</h3>
+          <h3>
+            Verifies correctness using QT3 / QT4 test set plus additional tests
+          </h3>
+        </section>
+        <section>
+          <h2>Prettier</h2>
+          <div class="r-stack">
+            <div class="fragment fade-in-then-out">
+              Makes code Prettier. Plugin available in about every IDE.
+            </div>
+            <div class="fragment fade-in-then-out">
+              <h4>Parse code</h4>
+              <h4>Build tree, adding breakpoints</h4>
+              <h4>Output, breaking where needed</h4>
+            </div>
+            <pre
+              class="fragment fade-in-then-out language-xquery"
+            ><code style="overflow: hidden"
+                   >'A very very very long string' || ' That is sure to go over the limit'</code></pre>
+            <pre
+              class="fragment fade-in-then-out language-js"
+              data-trim
+            ><code style="overflow: hidden"
+                   >
+const stringConcatExpression = join([
+  leftHandSide,
+  space,
+  '||',
+  break(indent(rightHandSide))
+])
+            </code></pre>
+            <pre
+              class="fragment fade-in-then-out language-xquery"
+            ><code style="overflow: hidden" data-trim
+>
+'A very very very long string' || ' That is sure to go over the limit'
+                              ^  ^
+                             /   '-  if break: newline+indent,
+                          space      otherwise space
+          </code></pre>
+            <pre
+              data-trim
+              class="fragment fade-in-then-out language-xquery"
+            ><code               style="overflow: hidden"
+>'A very very very long string' ||
+  ' That is sure to go over the limit' </code></pre>
+          </div>
+          <aside class="notes">
+            <p>
+              While this presentation is way too short to go into Prettier, a
+              short rundown of how it works. It's DECLARATIVE!
+            </p>
+            <ol>
+              <li>Parse code, stripping all whitespace</li>
+              <li>Build a tree to determine where to place whitespace again</li>
+              <li>
+                Start printing: but whenever a group does not fit on a line,
+                break it up where possible / allowed
+              </li>
+            </ol>
+
+            <p>See example</p>
+            <p>
+              Now repeat this for all other places, choose where and how to
+              break, and it's done!
+            </p>
+          </aside>
+        </section>
+        <section>
+          <section>
+            <h2>🧪Dialects🧪</h2>
+            <h4>Experimental. Not fully implemented yet</h4>
+          </section>
+          <section>
+            <h2>Amending grammars</h2>
+            <h4>Take the XQ4 grammar</h4>
+            <h4>Parse it</h4>
+            <h4>Add new Rule to ExprSingle (for example)</h4>
+            <h4>Add definition for that Rule</h4>
+            <h4>Serialize to string</h4>
+            <aside class="notes">
+              <ol>
+                <li>Amending a grammar is also declarative</li>
+                <li>
+                  Take the grammar and parse it using a parser generated by the
+                  REX parser generator
+                </li>
+                <li>
+                  Add a new rule to what you want to override (in the case of
+                  ExistDB update node: ExprSingle
+                </li>
+                <li>Add a definition of that rule</li>
+                <li>Serialize everything to string again</li>
+              </ol>
+            </aside>
+          </section>
+          <section>
+            <pre class="language-js"><code>const existDBMutations = [
+	{
+		where: 'ExprSingle',
+		name: 'ExistDB_UpdateExpr',
+		additionalRule: `ExistDB_UpdateExpr ::= 'update' (
+  ExistDB_UpdateInsertExpr |
+  ExistDB_UpdateReplaceExpr |
+  ExistDB_UpdateDeleteExpr |
+  ExistDB_UpdateRenameExpr |
+  ExistDB_UpdateValueExpr
+)`,
+	},
+];
+            </code></pre>
+            <aside class="notes">
+              As illustrated by this example for the Exist DB node syntax. This
+              (should be) extensible to the other dialects
+            </aside>
+          </section>
+        </section>
+        <section>
+          <h2>Status</h2>
+          <h3>✓ XQuery 3.1</h3>
+          <h3>🧪 XQuery 4.0</h3>
+          <h3>🧪 ExistDB update node syntax</h3>
+          <h3>👷 Other Dialects</h3>
+          <h5>Sponsors?</h5>
+          <h3>👷 Embedded XQuery in XSLT</h3>
+          <h5>Sponsors?</h5>
+          <aside clas="notes">
+            So where are we?
+
+            <ol>
+              <li>XQuery 3.1 is fully supported!</li>
+              <li>XQuery 4.0 is partially working, on an experimental build</li>
+              <li>
+                The ExistDB syntax is supported, on that same experimental build
+              </li>
+              <li>Other dialects: there is a path, seeking sponsorship!</li>
+              <li>Embeddings: also seeking sponsorship!</li>
+            </ol>
+          </aside>
+        </section>
+        <section>
+          <h1>Why</h1>
+          <h2 class="fragment">Useful?</h2>
+        </section>
+        <section>
+          <h1>Available on NPM</h1>
+          <h2>prettier-plugin-xquery</h2>
+          <h2>xquery.elliat.nl</h2>
+        </section>
+        <section>
+          <h1>Q?</h1>
+
+          <h5>prettier-plugin-xquery</h5>
+          <h5>xquery.elliat.nl</h5>
         </section>
       </div>
     </div>
