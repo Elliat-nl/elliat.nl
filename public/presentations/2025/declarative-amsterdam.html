@@ -9,12 +9,18 @@
         <section>
           <h2>JavaScripter writing XQuery: Formatting XQuery code</h2>
           <h4>Martin Middel</h4>
-          <h5>Declarative Amsterdam, 9 November 2025</h5>
+          <h5>Declarative Amsterdam, 7 November 2025</h5>
+          <h5><a href="https://xquery.elliat.nl">xquery.elliat.nl</a></h5>
         </section>
 
         <section>
           <section>
             <h2>A brief history of me</h2>
+            <div>
+              <img width="400" src="assets/existsolutions-logo.svg" />
+              <br />
+              <img width="400" src="assets/jinntec-logo-color.svg" />
+            </div>
           </section>
           <section>
             <h2>
@@ -54,6 +60,10 @@
             </div>
             <aside class="notes">
               <p>
+                I am now with ExistSolutions and Jinntec, doing freelance Fonto
+                Consultancy on the side
+              </p>
+              <p>
                 I started writing JavaScript for Money around 2012. With the
                 company FontoXML
               </p>
@@ -72,7 +82,8 @@
               <div class="fragment fade-in-then-out">
                 <h3>2013: Typechecking with TypeScript!</h3>
                 <pre><code data-trim class="language-javascript">
-// Property 'apendChild' does not exist on type 'Node'.
+// Property 'apendChild' does
+// not exist on type 'Node'.
 // Did you mean 'log'?(2551)
 node.apendChild(newChildNode);
 </code></pre>
@@ -107,9 +118,15 @@ node.apendChild(newChildNode);
           <section>
             <h2>And then: XQuery</h2>
             <aside class="notes">
-              In Fonto we introduced a lot of XQuery based APIs. That made me
-              write a lot more XQuery. Later on, I joined exist solutions
-              (callout Juri!) and I started to write more XQuery than JS.
+              <p>
+                We with Fonto introduced a lot of XQuery based APIs around 2017
+                to 2020. That slowly made me write a lot more XQuery. In 2024, I
+                left Fonto and I joined Exist Solutions (callout Juri!)
+              </p>
+              <p>
+                Nowadays I do a mix of Exist-DB consultancy with ExistSolutions
+                and solo Fonto consultancy
+              </p>
             </aside>
           </section>
           <section>
@@ -146,8 +163,10 @@ if ($something) then (util:log('info', 'Did something!'), local:do-something()) 
           </aside>
         </section>
 
-        <section>
-          <p>I missed JS</p>
+        <section
+          data-background-image="https://media1.tenor.com/m/ZmeuDyR4qZAAAAAd/play-violin-violin.gif"
+        >
+          <h1>I missed JS</h1>
           <aside class="notes">This was too much. I missed JS.</aside>
         </section>
 
@@ -213,6 +232,7 @@ return
                 <li>Exist-DB has some update node syntax,</li>
                 <li>BaseX has their own flavour of if/else conditions,</li>
                 <li>Marklogic has their own flavour of XQuery</li>
+                <li>More? Come talk to me!</li>
               </ol>
               <p>
                 By default the parser rejects dialects as they are syntax
@@ -441,11 +461,14 @@ const stringConcatExpression = join([
           </section>
           <section>
             <h2>Amending grammars</h2>
-            <h4>Take the XQ4 grammar</h4>
-            <h4>Parse it</h4>
-            <h4>Add new Rule to ExprSingle (for example)</h4>
-            <h4>Add definition for that Rule</h4>
-            <h4>Serialize to string</h4>
+            <ol>
+              <li>Take the XQ4 grammar</li>
+              <li>Parse it</li>
+              <li>Add new Rule to ExprSingle (for example)</li>
+              <li>Add definition for that Rule</li>
+              <li>Serialize to string</li>
+              <li>Decide on formatting</li>
+            </ol>
             <aside class="notes">
               <ol>
                 <li>Amending a grammar is also declarative</li>
@@ -507,7 +530,7 @@ ExistDB_UpdateRenameExpr ::= 'rename' Expr 'as' ExprSingle
           <h5>Sponsors?</h5>
           <h3>👷 Embedded XQuery in XSLT</h3>
           <h5>Sponsors?</h5>
-          <aside clas="notes">
+          <aside class="notes">
             So where are we?
 
             <ol>

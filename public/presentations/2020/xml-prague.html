@@ -1,0 +1,456 @@
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <script src="../2025/presentation" type="module"></script>
+  </head>
+<body>
+  <div class="reveal">
+			<div class="slides">
+				<section class="first" id="1">
+					<h2 style="color: white">A Note on Editor Performance</h2>
+					<div style="display: inline-flex">
+						<p>
+							<strong style="color: #a08b62">Martin Middel</strong><br />
+							<a href="https://twitter.com/dr_rataplan">@dr_rataplan</a>
+						</p>
+						<p>&nbsp;&amp;&nbsp;</p>
+						<p>
+							<strong style="color: #a08b62">Stef Busking</strong><br />
+							<a href="https://twitter.com/bwrrp">@bwrrp</a>
+						</p>
+					</div>
+					<p>
+						<strong>Fonto</strong>
+					</p>
+				</section>
+
+				<section>
+					<section>
+						<h2>What is Fonto?</h2>
+						<ul>
+							<li>Schema experience</li>
+							<li>Operations</li>
+							<li>User interface</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Browser-based WYSIWYM XML editor</li>
+								<li>Configurable for any schema</li>
+								<li>Schema experience - how XML should look and behave</li>
+								<li>Operations - what changes can be made</li>
+								<li>
+									UI - not only documents themselves, but also metadata, operation
+									states, other derived data...
+								</li>
+								<li>
+									We prefer to use existing standards for our configuration: XPath
+									/ XQuery
+								</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>What is performance?</h2>
+						<ul>
+							<li>Configuration lookups and queries</li>
+							<li>Validation</li>
+							<li>UI responsiveness</li>
+							<li>Sensitivity to configuration / document size</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Whenever you press a key...</li>
+								<li>Growing from 100KB to megabytes</li>
+								<li>Even more with JIT loading...</li>
+							</ul>
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Accessing configuration</h2>
+						<pre
+							class="fragment"
+						><code class="js">configureAsBlock(sxModule, 'self::p');</code></pre>
+						<table class="fragment">
+							<tr>
+								<th>Property</th>
+								<th>Value</th>
+							</tr>
+							<tr>
+								<td>Ignored for navigation</td>
+								<td>false</td>
+							</tr>
+							<tr>
+								<td>Splittable</td>
+								<td>true</td>
+							</tr>
+							<tr>
+								<td>Layout type</td>
+								<td>block</td>
+							</tr>
+							<tr>
+								<td>Render as</td>
+								<td>Block template</td>
+							</tr>
+							<tr>
+								<td>...</td>
+								<td>...</td>
+							</tr>
+						</table>
+
+						<aside class="notes">
+							<ul>
+								<li>
+									Lots of "flow properties" under water that control basic look
+									and feel
+								</li>
+								<li>
+									Lots of optional ones for extra's (formatting, behavior tweaks,
+									...)
+								</li>
+								<li>
+									"Best" selector wins, priority / specificity / order of
+									declaration
+								</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Orthogonal configuration</h2>
+						<pre><code class="js">configureAsBlock(sxModule, 'self::p');</code></pre>
+						<pre><code class="js">configureAsBlock(sxModule, 'self::p[@align="right"]', {
+	align: 'right'
+});</code></pre>
+						<pre
+							class="fragment"
+						><code class="js">configureProperties(sxModule, 'self::p[@align="right"]', {
+	align: 'right'
+});</code></pre>
+						<aside class="notes">
+							<ul>
+								<li>
+									Instead of re-configuring all the basic properties to tweak
+									appearance, only redefine the single property.
+								</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Selector buckets</h2>
+						<table border="1">
+							<tr>
+								<th>Selector</th>
+								<th>Bucket</th>
+							</tr>
+							<tr>
+								<td><code class="xpath">self::p</code></td>
+								<td>name-p</td>
+							</tr>
+							<tr>
+								<td><code class="xpath">self::element()</code></td>
+								<td>type-1</td>
+							</tr>
+							<tr>
+								<td><code class="xpath">self::p or self::div</code></td>
+								<td>type-1</td>
+							</tr>
+						</table>
+
+						<aside class="notes">
+							<ul>
+								<li>Avoid evaluating each selector for each node</li>
+								<li>Bucket is simple "hash"</li>
+								<li>Group by bucket, only evaluate matching</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Order of evaluation</h2>
+						<aside class="notes">
+							<ul>
+								<li>Some selectors match more than others</li>
+								<li>Some rules are more likely to win than others</li>
+								<li>Take specificity and priority into account</li>
+								<li>
+									Bayesian predictor is generic enough to also support likely
+									attributes and cases where all selectors have equal specificity.
+								</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Results</h2>
+						<table border="1">
+							<tr>
+								<th />
+								<th>Amount of XPaths evaluated</th>
+							</tr>
+							<tr>
+								<td>Without the Bayesian predictor</td>
+								<td>121&nbsp;575</td>
+							</tr>
+							<tr>
+								<td>With the Bayesian predictor</td>
+								<td>109&nbsp;964</td>
+							</tr>
+						</table>
+
+						<aside class="notes">
+							<ul>
+								<li>Deduplication of values helps (widgets etc)</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Results</h2>
+						<table border="1" style="font-size:.5em">
+							<tr>
+								<th>Selector</th>
+								<th align="center" colspan="2">without</th>
+								<th align="center" colspan="2">with</th>
+							</tr>
+
+							<tr>
+								<td>
+									<code class="xpath">self::label</code>
+								</td>
+								<td align="right"><p>79</p></td>
+								<td align="right"><p>2&nbsp;ms</p></td>
+								<td align="right"><p>1&nbsp;662</p></td>
+								<td align="right"><p>47&nbsp;ms</p></td>
+							</tr>
+							<tr>
+								<td>
+									<code class="xpath">self::label[parent::abstract]</code>
+								</td>
+								<td align="right"><p>79</p></td>
+								<td align="right"><p>3&nbsp;ms</p></td>
+								<td align="right"><p>1</p></td>
+								<td align="right"><p>(Too low to measure)</p></td>
+							</tr>
+							<tr>
+								<td>
+									<code class="xpath">self::label[parent::fn]</code>
+								</td>
+								<td align="right"><p>1&nbsp;733</p></td>
+								<td align="right"><p>60&nbsp;ms</p></td>
+								<td align="right"><p>1&nbsp;091</p></td>
+								<td align="right"><p>42&nbsp;ms</p></td>
+							</tr>
+							<tr>
+								<td>
+									<code class="xpath"
+										>self::named-content[@vocab="unit-category"]</code
+									>
+								</td>
+								<td align="right">2&nbsp;173</td>
+								<td align="right">160&nbsp;ms</td>
+								<td align="right">1&nbsp;174</td>
+								<td align="right">96&nbsp;ms</td>
+							</tr>
+							<tr>
+								<td>
+									<code class="xpath"
+										>self::named-content[@vocab="specification"]</code
+									>
+								</td>
+								<td align="right"><p>325</p></td>
+								<td align="right"><p>22&nbsp;ms</p></td>
+								<td align="right"><p>538</p></td>
+								<td align="right"><p>56&nbsp;ms</p></td>
+							</tr>
+						</table>
+
+						<aside class="notes">
+							<ul>
+								<li>Abstract case is so rare, it almost disappears</li>
+								<li>
+									the 'default' named-content without attrs is never used. Bayes
+									provides estimation of 'common' variants
+								</li>
+							</ul>
+						</aside>
+					</section>
+				</section>
+				<!-- VROT -->
+				<section>
+					<section>
+						<h2>Processing XML</h2>
+						<aside class="notes">
+							<ul>
+								<li>What's an editor with no way to edit?</li>
+								<li>Get nodes of interest, modify, validate</li>
+								<li>Operation state: try it after every change</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>XPath performance</h2>
+						<ul>
+							<li>Lazy evaluation</li>
+							<li>Outermost</li>
+							<li>Buckets as cheap early fail</li>
+						</ul>
+						<pre><code class="xpath">descendant-or-self::li[1]</code></pre>
+						<pre><code class="xpath">descendant-or-self::li => outermost()</code></pre>
+					</section>
+
+					<section>
+						<h2>XML Validation</h2>
+						<ul>
+							<li>NFA</li>
+							<li>Offline pre-processing</li>
+							<li>un-JavaScript-like optimizations</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Offline pre-process: remove unnecessary optionality, groups</li>
+								<li>These often exist due to XML Schema extension rules</li>
+								<li>Avoid memory allocations - all state in an ArrayBuffer</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Indices - DOM</h2>
+						<ul style="min-width:90%">
+							<li>
+								Attribute index
+								<pre><code class="xpath">/descendant-or-self::*[@id=$value]</code></pre>
+							</li>
+							<li>
+								Bucket index<br />
+								<pre><code class="xpath">/descendant-or-self::fn</code></pre>
+							</li>
+							<li>
+								Descendant index<br />
+								<pre><code class="xpath">$node/descendant::li</code></pre>
+							</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Indices make lookups constant time</li>
+								<li>
+									Actively track nodes of interest instead of looking for them
+									later
+								</li>
+								<li>Update using DOM mutation records</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h2>Indices - arbitrary computations</h2>
+						<ul>
+							<li>Dependency tracking</li>
+							<li>Caching & invalidation</li>
+							<li>Optimizations</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>As presented in 2017 for Schematron</li>
+								<li>Mutation record type ~ dom access method</li>
+								<li>
+									Dependency optimizations: filter functions, buckets (e.g., child
+									li)
+								</li>
+								<li>
+									Current / future work: incremental computation through index
+									dependencies
+								</li>
+							</ul>
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Related work</h2>
+					<ul>
+						<li>XSLT</li>
+						<li>XML databases</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>
+								XSLT similar to configuration, but usually selectors to templates is
+								almost 1:1, and there are many templates. In Fonto, we have few
+								values per property, so lots of selectors for the same value
+							</li>
+							<li>
+								XML databases also optimize XPath / XQuery, but different use case:
+								in Fonto edits are both frequent and very local. Browser-based means
+								data needs to be of a downloadable size and will therefore fit in
+								memory. Startup time needs to be fast, no persistent storage for
+								caches / indices, no expensive index builds possible.
+							</li>
+						</ul>
+					</aside>
+				</section>
+
+				<section class="notes">
+					<h2>The end?</h2>
+					<ul>
+						<li>Many tricks possible</li>
+						<li>Browser-based XML processing can be fast</li>
+						<li>Lots more to do...</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>
+								There are lots of ways to make processing XML fast, also for
+								interactive use cases
+							</li>
+							<li>Even in the browser, and without platform support</li>
+							<li>
+								We'll continue to improve indices as we further adopt XQUF - use for
+								operation states. Perhaps XQuery Tasks? @Debbie Lockett @Adam
+								Retter?
+							</li>
+							<li>
+								We're still looking for a good declarative format for our schema
+								experience configuration - CSS fits, but OUR selectors are XPath
+							</li>
+						</ul>
+					</aside>
+				</section>
+
+				<section class="last">
+					<h2 style="color:white">Questions</h2>
+					<p>
+						<a href="https://twitter.com/dr_rataplan">@dr_rataplan</a> /
+						<a href="https://twitter.com/bwrrp">@bwrrp</a>
+					</p>
+					<p>
+						<a href="https://twitter.com/fontoxml">@fontoxml</a>
+					</p>
+				</section>
+			</div>
+		</div>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				hash: true,
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/highlight/highlight.js' },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>

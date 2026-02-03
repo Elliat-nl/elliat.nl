@@ -1,0 +1,392 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <script src="../2025/presentation" type="module"></script>
+
+		<style>
+		 #xmlFile * {
+			 display: block;
+			 margin: 5px 5px 5px 5px;
+			 border: 5px solid grey;
+			 min-height: 5px;
+			 color: white;
+		 }
+		 #xmlFile b {
+			 display: inline;
+		 }
+		</style>
+
+
+		<!-- Printing and PDF exports -->
+		<script>
+		 var link = document.createElement( 'link' );
+		 link.rel = 'stylesheet';
+		 link.type = 'text/css';
+		 link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		 document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Soft validation in an editor environment</h1>
+					<h3>Martin Middel, FontoXML</h3>
+					<aside class="notes">REMEMBER TO START DOCBOOK SERVER at 8080</aside>
+				</section>
+				<section>
+					<section>
+						<h1>What is FontoXML?</h1>
+					</section>
+					<section>
+						<p>Note: the original presentation contains a demo of the FontoXML docbook editor. A similar editor is available at <a href="http://dita.fontoxml.com/">dita.fontoxml.com</a></p>
+						<!-- <iframe src="http://localhost:8080/?scope=%7B%22documentIds%22:[%22paper.xml%22]%7D#/editor?documentIds=%5B%22paper.xml%22%5D" class="stretch"></iframe> -->
+						<aside class="notes">
+							<ul>
+								<li>Fonto is an editor easily configured for most schemas</li>
+								<li>DiTa, TEI, HTML, office open xml, even docbook</li>
+								<li>This is fonto donfugred for docbook, in which i wrote my paper</li>
+								<li>This is fonto! </li>
+								<li>Our authors no not know XML, we guide them into writing schema valid</li>
+								<li>open the structure tab, then the source tab, press ctrl+b to make something bold.</li>
+						  </ul>
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Schematron</h2>
+					<p class="fragment">A set of queries for nodes</p>
+					<p class="fragment">Followed by assertions and tests for them</p>
+					<pre class="fragment"><code data-trim>
+						<sch:schema xmlns:sch="http://purl.oclc.org/dsdl/schematron">
+							<sch:title>An example schema</sch:title>
+							<sch:rule context="p">
+								<sch:assert test="@class">
+									A paragraph must have a class
+								</sch:assert>
+							</sch:rule>
+						</sch:schema>
+					</code></pre>
+					<aside class="notes" >Most of you know schematron already. For those who don't: queries and asserts/tests</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Schematron in Fonto</h2>
+						<pre class="fragment"><code data-trim>
+							<?xml version="1.0" encoding="utf-8"?>
+							<s:schema xmlns:s="…" xmlns:db="…">
+								<s:ns prefix="db" uri="…"></s:ns>
+								<s:pattern name="Element exclusion">
+									…
+									<s:rule context="db:footnote">
+										…
+										<s:assert test="not(.//db:footnote)">
+											footnote must not occur in the descendants of footnote
+										</s:assert>
+									</s:rule>
+								</s:pattern>
+							</s:schema>
+						</code></pre>
+						<aside class="notes">
+							Real life use case
+							This is the actual docbook.sch file
+						</aside>
+					</section>
+
+					<section>
+						<p>Note: the original presentation contains a demo of the FontoXML docbook editor. A similar editor is available at <a href="http://dita.fontoxml.com/">dita.fontoxml.com</a>. At the moment of writing, this does not contain a schematron implementation though.</p>
+						<!-- <iframe src="http://localhost:8080/?scope=%7B%22documentIds%22:[%22paper.xml%22]%7D#/editor?documentIds=%5B%22paper.xml%22%5D" class="stretch"></iframe> -->
+						<aside class="notes">
+							<ol>
+								<li>Open the soft validation panel, observe no errors.</li>
+								<li>If I open a footnote: new error.</li>
+								<li>Click on solve, press delete, observe: error gone.</li>
+								<li>Observe, no anymation, this is a development version for release next week</li>
+							</ol>
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h3>Performance</h3>
+					<ul>
+						<li>3500+ (generated) Schematron rules</li>
+						<li>Look like this:
+							<ul>
+								<li>rule: <code >/chunk[@class="achievement"]/ chunk-body/descendant::ol‍ [@class="achievement-list"]</code></li>
+								<li>assert: <code>count(child::li[not(@class)]) < 1</code></li>
+							</ul>
+						</li>
+					</ul>
+					<aside class="notes">
+						<ol>
+							<li>One on our clients 3500+ rules.</li>
+							<li>Generated, so we can make them absolute.</li>
+							<li>We can give them an exit early</li>
+							<li>Not possible to run them every keystroke</li>
+							<li>Cant even run them every new element</li>
+							<li>We need a way to prevent re-running them</li>
+						</ol>
+					</aside>
+				</section>
+
+				<section>
+					<h2>Options</h2>
+					<h3 class="fragment">Server side</h3>
+					<h3 class="fragment">Big Update Button</h3>
+					<img class="fragment" src="img/do it live.gif"/>
+				</section>
+
+				<section>
+					<section>
+						<h3>XPath 3.1 in the browser</h3>
+						<h5>How we did it</h5>
+					</section>
+					<section>
+						<h3>Parse the XPath expression</h3>
+						<ul>
+							<li class="fragment">PegJS parser generator</li>
+							<li class="fragment">Outputs an ast in JSON: </li>
+							<li class="fragment"><pre><code data-trim>
+[
+	"absolutePath",
+	[
+		"path",
+		[
+			"descendant-or-self",
+			["kindTest", "node()"]
+		]
+	]
+]
+							</code></pre></li>
+							<li class="fragment">This is saved in 'indexedDB', no parser hit next time</li>
+						</ul>
+						<aside class="notes">
+							<ol>
+								<li>We used PEGJS to generate a parser from a grammar</li>
+								<li>This grammar already drops unneeded levels</li>
+								<li>to a JSON ast</li>
+								<li>We do not want to re-parse every XPath</li>
+								<li>That is why we cache them</li>
+								<li>in a persistent storage, so that we can save them accross browser instances. Which is good, because our authors keepcoming back</li>
+							</ol>
+						</aside>
+					</section>
+
+					<section>
+						<h3>Execute it</h3>
+						<ul>
+							<li class="fragment">Parse the ast to JavaScript models</li>
+							<li class="fragment">Resolve functions</li>
+							<li class="fragment">Propagate variables on the dynamic context</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+				  <h3>Instant feedback</h3>
+				  <ul>
+					  <li>We need instant feedback</li>
+					  <li>Remember: non-technical authors</li>
+					  <li>Need to be guided</li>
+				  </ul>
+				</section>
+
+				<section>
+					<h3>How to do it live</h3>
+					<ul>
+						<li class="fragment">Optimize all the queries</li>
+						<li class="fragment">Only run affected queries</li>
+					</ul>
+					<aside class="notes" >
+						<ul>
+							<li>We can make individual queries as fast as possible</li>
+							<li>Or we can less of them</li>
+							<li>We chose the latter, this introduces the need for dep track</li>
+						</ul>
+					</aside>
+				</section>
+
+				<section>
+					<h3>Dependency tracking</h3>
+					<pre><code data-trim>
+						class DependencyTrackingDomFacade {
+							getParentNode (node) {
+								addDep('childList', node.parentNode);
+								return node.parentNode;
+							}
+							getNextSibling (node) {
+								addDep('childList', node.parentNode);
+								return node.nextSibling;
+							}
+							getAttribute (node, name) {
+								addDep('attributes', node);
+								return node.getAttribute(name);
+							}
+						}
+					</code></pre>
+					<aside class="notes" >
+						<ul>
+							<li>We catch all the (changeable) DOM accessors</li>
+							<li>This allows us to determine if a mutation could affect a query</li>
+						</ul>
+					</aside>
+				</section>
+
+				<section>
+					<h4>MutationObserver</h4>
+					<pre><code data-trim>
+{
+ type: 'childList' | 'attribute' | 'characterData',
+ target: Node,
+ addedNodes: Node[],
+ removedNodes: Node[],
+ nextSibling: Node?,
+ previousSibling: Node?,
+ attributeName: String?,
+ oldValue: String?
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Demo time</h3>
+					<p contenteditable="true" id="xpathField">/chunk/chunk-body/ol/li</p>
+					<div>
+						<pre id="xmlSource" contentEditable="true" width="45%" style="width: 45%; float: left"><code data-trim>
+							<chunk>
+								<introduction>
+									<p>Some text</p>
+								</introduction>
+								<chunk-body>
+									<p>Some more text</p>
+									<ol>
+										<li>A list item</li>
+									</ol>
+								</chunk-body>
+							</chunk>
+						</code></pre>
+						<p id="xmlFile" style="width: 45%; float:right" />
+</div>
+					<div style="position: relative; float: right">
+					  <p style="border:5px solid grey">I did not get touched</p>
+						  <p style="border: 5px solid red">I am a hit</p>
+						<p style="border: 5px solid green">I got my child axis hit</p>
+					</div>
+					<aside class="notes">
+						<ol>
+							<li>Summarized situation</li>
+							<li>everything with a red border is a result</li>
+							<li>everything with a pink border has its&apos; child axis accessed</li>
+						</ol>
+					</aside>
+				</section>
+
+
+				<section>
+					<h3>Done?</h3>
+					<ul>
+						<li>Not nearly</li>
+						<li>Static analysis / optimization</li>
+						<li>Partial queries / result caching</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Conclusion</h3>
+					<ul>
+						<li>Client is happy</li>
+						<li>Good editing performance</li>
+						<li class="fragment">Next year: write your paper in Fonto</li>
+					</ul>
+				</section>
+
+			</div>
+			<script type="module">
+			  import * as fontoxpath from 'fontoxpath';
+			 (function () {
+				 function getPointer (node) {
+ 					 return fontoxpath.evaluateXPathToString(
+	 					 'if (not(self::element())) then "()" else ancestor-or-self::*!("child::*[" || count(preceding-sibling::*) + 1 || "]") => string-join("/")',
+ 						 node,
+ 						 fontoxpath.domFacade);
+				 }
+
+
+				 function buildDomFacade (outputMap) {
+					 function addDep (type, node) {
+						 if (!node) {
+							 return;
+						 }
+						 var deps = outputMap.has(node) ? outputMap.get(node) : Object.create(null);
+						 deps[type] = true;
+						 outputMap.set(node, deps);
+					 }
+					 return new class DependencyTrackingDomFacade {
+						 getParentNode (node) { addDep('childList', node.parentNode); return node.parentNode;}
+						 getFirstChild (node) { addDep('childList', node); return node.firstChild;}
+						 getNextSibling (node) { addDep('childList', node.parentNode); return node.nextSibling;}
+						 getPreviousSibling (node) { addDep('childList', node.parentNode); return node.previousSibling;}
+						 getLastChild (node) { addDep('childList', node); return node.lastChild;}
+						 getChildNodes (node) { addDep('childList', node); return node.childNodes;}
+						 getAttribute (node, name) { addDep('attributes', node); return node.getAttribute(name);}
+						 getAllAttributes (node) { addDep('attributes', node); return Array.from(node.attributes);}
+						 getData (node) { addDep('data', node); return node.data;}
+					 }
+				 }
+				 let xmlDoc;
+				 function rerenderDocument () {
+					 const domParser = new DOMParser();
+					 const xmlString = window.xmlSource.innerText.replace(/\n\s+/gi, '');
+					 xmlDoc = domParser.parseFromString(xmlString, 'text/xml');
+					 window.xmlFile.innerHTML = xmlString;
+				 }
+				 rerenderDocument();
+				 function rerunXPath () {
+					 let resultNodes;
+					 const dependencyMap = new Map();
+					 try {
+						 resultNodes = fontoxpath.evaluateXPathToNodes(window.xpathField.innerText, xmlDoc, buildDomFacade(dependencyMap));
+					 } catch (err) {
+						 console.warn('Error: ' + err.message);
+						 window.resultText.innerText = fontoxpath.evaluateXPath(window.xpathField.innerText, xmlDoc, fontoxpath.domFacade) + '';
+						 return;
+					 }
+					 const text = resultNodes.map(node => node.nodeType === node.TEXT_NODE ? node.textContent : node.outerHTML).join('\n');
+					 for (const [node, deps] of dependencyMap) {
+						 const path = getPointer(node);
+						 const correspondingNode = fontoxpath.evaluateXPathToFirstNode(path, window.xmlFile, fontoxpath.domFacade);
+						 if (!correspondingNode) {
+							 continue;
+						 }
+						 correspondingNode.setAttribute('style', 'border: 5px solid green');
+					 }
+					 const paths = resultNodes.map(getPointer);
+					 const htmlNodes = paths
+						 .map(path => fontoxpath.evaluateXPathToFirstNode(path, window.xmlFile, fontoxpath.domFacade))
+ 						 .filter(n => !!n);
+
+					 htmlNodes.forEach(node => node.setAttribute('style', 'border: 5px solid red'));
+				 }
+
+				 window.xmlSource.oninput = xpathField.oninput = evt => {
+					 try {
+						 rerenderDocument();
+						 if (fontoxpath.evaluateXPathToBoolean('//parseerror', xmlDoc, fontoxpath.domFacade)) {
+							 log.innerText = 'Error: invalid XML';
+							 return;
+						 }
+						 rerunXPath();
+					 } catch (e)
+					 {
+					 }
+				 };
+				 setTimeout(() => {rerenderDocument(); rerunXPath()}, 5000);
+			 }());
+
+			</script>
+	</body>
+</html>
