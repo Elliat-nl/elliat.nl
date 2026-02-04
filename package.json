@@ -8,5 +8,8 @@
   },
   "dependencies": {
     "fontoxpath": "^3.33.2"
-  }
+  },
+	"scripts": {
+		"build": "vite build"
+	}
 }
