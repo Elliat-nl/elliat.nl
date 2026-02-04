@@ -2,6 +2,9 @@ import Reveal from "reveal.js";
 import RevealHighlight from "reveal.js/plugin/highlight/highlight.esm.js";
 import RevealNotes from "reveal.js/plugin/notes/notes";
 
+import controllerUrl from "./assets/controller.xql";
+import formattedControllerUrl from "./assets/controller-formatted.xql";
+
 import "@picocss/pico";
 import "reveal.js/dist/reveal.css";
 import "reveal.js/dist/reset.css";
@@ -11,6 +14,20 @@ import "reveal.js/plugin/highlight/monokai.css";
 import prettierPluginXQuery from "prettier-plugin-xquery";
 import prettierPluginXml from "@prettier/plugin-xml";
 import prettier, { Plugin, doc } from "prettier";
+
+const xqlAssets = {
+  "./assets/controller-formatted.xql": formattedControllerUrl,
+  "./assets/controller.xql": controllerUrl,
+};
+
+for (const iframe of window.document.querySelectorAll(
+  "[data-background-iframe]",
+)) {
+  iframe.setAttribute(
+    "data-background-iframe",
+    xqlAssets[iframe.getAttribute("data-background-iframe")!],
+  );
+}
 
 const { group } = doc.builders;
 const deck = new Reveal({

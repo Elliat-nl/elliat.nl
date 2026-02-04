@@ -13,9 +13,7 @@
     "@prettier/plugin-xml": "^3.4.2",
     "hljs": "^6.2.3",
     "prettier": "^3.6.2",
-    "reveal-notes-server": "^0.2.1"
-  },
-  "devDependencies": {
-    "prettier-plugin-xquery": "^1.2.6"
+    "reveal-notes-server": "^0.2.1",
+    "prettier-plugin-xquery": "^1.5.0"
   }
 }
