@@ -46,6 +46,7 @@ export default defineConfig(async () => {
   return {
     root: "./public",
     publicDir: false,
+    assetsInclude: ["**/*.xql"],
     build: {
       rollupOptions: {
         input: pathByName,
