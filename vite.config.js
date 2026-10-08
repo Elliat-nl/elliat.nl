@@ -1,5 +1,5 @@
 import { lstatSync, readdirSync } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -31,6 +31,25 @@ function accumulateFiles(pathByName, entry) {
   };
 }
 
+// `public` is the Vite root and `publicDir` is disabled, so files that no page
+// references have to be emitted explicitly.
+const staticFiles = ["robots.txt", "sitemap.xml"];
+
+function copyStaticFiles() {
+  return {
+    name: "copy-static-files",
+    async generateBundle() {
+      for (const fileName of staticFiles) {
+        this.emitFile({
+          type: "asset",
+          fileName,
+          source: await readFile(resolve(__dirname, "public", fileName)),
+        });
+      }
+    },
+  };
+}
+
 export default defineConfig(async () => {
   const files = await readdir(resolve(__dirname, "public"));
 
@@ -46,6 +65,7 @@ export default defineConfig(async () => {
   return {
     root: "./public",
     publicDir: false,
+    plugins: [copyStaticFiles()],
     assetsInclude: ["**/*.xql"],
     build: {
       rollupOptions: {
