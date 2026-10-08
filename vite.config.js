@@ -33,7 +33,7 @@ function accumulateFiles(pathByName, entry) {
 
 // `public` is the Vite root and `publicDir` is disabled, so files that no page
 // references have to be emitted explicitly.
-const staticFiles = ["robots.txt", "sitemap.xml"];
+const staticFiles = ["robots.txt", "sitemap.xml", "favicon.png"];
 
 function copyStaticFiles() {
   return {
